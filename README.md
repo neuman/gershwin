@@ -1,0 +1,4 @@
+gershwin
+========
+
+Automatic Midi Composer
