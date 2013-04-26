@@ -60,17 +60,17 @@ class Dramatic(object):
                         duration = gershwin.Randomized([4,6]),
                         velocity = gershwin.Wandering(range(40,50))
                         )
-                x=500
+                x=800
                 
-                drone = (finger1.next(5) | transforms.stretch(1))*3
+                drone = (finger1.next(50) | transforms.stretch(1))*3
                 solo1 = finger1.next(x)
                 #solo2 = gershwin.humanize(finger1.last,1,1,1,1)
                 solo2 = finger1.next(x)
-                output = drone+(solo1//solo2//(drone*10)//finger3.next(x) | transforms.stretch(4))+(drone*3)
+                output = drone+(solo1//solo2//(drone*10)//finger3.next(x) | transforms.stretch(5))+(drone*3)
                 self.hand = [finger1,finger2,finger3,finger4]
                 self.last = output
                 try:
-                        player.play([output])
+                        player.play([output | midi_pitch()])
                 except Exception as e:
                         print e
 

@@ -4,37 +4,42 @@ from sebastian.core.transforms import reverse
 from sebastian.core import OSequence, HSeq, Point, DURATION_64
 from sebastian.midi import player
 from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch, lilypond
+print transpose
 
 OFFSET_64 = 'OFFSET_64'
 notes_in_an_octave = 12
+range_of_octaves = range(0,10)
 
 class Keyboard(object):
     notes = []
     #range(48,12) = middle c
     def __init__(self):
-        self.notes = HSeq(Point(midi_pitch=pitch) for pitch in range(21,108))
+        self.notes = HSeq(Point(pitch=pitch) for pitch in range(21,108))
 
 class MinorBluesKeyboard(Keyboard):
     """docstring for BluesKeyboard"""
     def __init__(self):
         super(MinorBluesKeyboard, self).__init__()
-        bluesminor = HSeq(Point(midi_pitch=pitch) for pitch in [0, 3, 5, 6, 7, 10])
+        #bluesminor = HSeq(Point(pitch=pitch) for pitch in [0, 3, 5, 6, 7, 10])
+        bluesminor = HSeq(Point(pitch=pitch, octave=5, velocity=90, duration_64=3) for pitch in [0, 3, 5, 6, 7, 10])
+        self.notes = bluesminor
+        for t in range(0, 9):
+            bluesminor = bluesminor | transpose(notes_in_an_octave) #it's 12
+            self.notes += bluesminor
+
+class NewMinorBluesKeyboard(Keyboard):
+    """docstring for BluesKeyboard"""
+    def __init__(self):
+        super(MinorBluesKeyboard, self).__init__()
+        self.pitches = [0, 3, 5, 6, 7, 10]
+        for o in range_of_octaves:
+            octave = HSeq(Point(pitch=pitch) for pitch in self.pitches)
         self.notes = bluesminor
         for t in range(0, 9):
             print bluesminor
             bluesminor = bluesminor | transpose(notes_in_an_octave) #it's 12
             self.notes += bluesminor
         self.notes = self.notes | add({DURATION_64:3})
-
-class NewMinorBluesKeyboard(Keyboard):
-    """docstring for BluesKeyboard"""
-    def __init__(self):
-        super(NewMinorBluesKeyboard, self).__init__()
-        bluesminor = HSeq(Point(midi_pitch=pitch) for pitch in [0, 3, 5, 6, 7, 10])
-        self.notes = bluesminor | transpose(notes_in_an_octave*2)
-        for t in range(4, 11):
-            bluesminor = bluesminor | transpose(notes_in_an_octave) #it's 12
-            self.notes += bluesminor
 
 class PentatonicKeyboard(Keyboard):
     """docstring for BluesKeyboard"""
