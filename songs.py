@@ -6,6 +6,7 @@ from sebastian.core.notes import Key, major_scale
 import random
 
 from gershwin.core import composition as gershwin
+from gershwin.transforms import delay
 import sebastian.core.transforms as transforms
 
 class Dramatic(object):
@@ -13,7 +14,7 @@ class Dramatic(object):
                 self.hand = []
 
         def next(self):
-                keys = gershwin.MinorBluesKeyboard().notes
+                keys = gershwin.Keyboard().notes
                 self.keys = keys
                 stretch_length = random.randint(2,5)
                 left_low = random.randint(40,70)
@@ -110,7 +111,7 @@ class Loopy(object):
                 )
                 self.hand = [finger1]
                 x = 160
-                player.play([gershwin.loop([finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x)])])
+                #player.play([gershwin.loop([finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x),finger1.next(x)])])
                 try:
                         player.play([output])
                 except Exception as e:
@@ -121,3 +122,159 @@ class Loopy(object):
 
 
 
+class Omatic(object):
+        def __init__(self):
+                self.hand = []
+        '''
+        keyboards = [gershwin.Keyboard(), gershwin.MinorBluesKeyboard(), gershwin.EvenKeyboard(), gershwin.OddKeyboard(), gershwin.PentatonicKeyboard()]
+        pickers = [
+        gershwin.Randomized(),
+        gershwin.Wandering(), 
+        gershwin.Oscilating(), 
+        gershwin.Ascending(), 
+        gershwin.Constant()
+        ]
+        '''
+
+        def next(self):
+                keys = gershwin.PentatonicKeyboard().notes
+                self.keys = list(keys)
+                keycount = len(self.keys)
+                stretch_length = random.randint(2,5)
+                left_low = random.randint(keycount/4,(keycount/2))
+                left_range = random.randint(1,2)
+                mids = HSeq(self.keys.__getslice__(left_low,left_low+left_range))
+                right = HSeq(self.keys.__getslice__(keycount-(keycount/4), keycount-1))
+
+                finger1 = gershwin.Finger(
+                length = 16,
+                note = gershwin.Wandering(mids),
+                duration = gershwin.Oscilating(range(2,8)),
+                velocity = gershwin.Randomized(range(20,127)),
+                rest = gershwin.Randomized([10,20,40])
+                )
+
+                finger2 = gershwin.Finger(
+                        length = 160,
+                        note = gershwin.Wandering(right),
+                        duration = gershwin.Randomized(range(2,80)),
+                        velocity = gershwin.Wandering(range(50,90)),
+                        rest = gershwin.Randomized([1,2,3,4,5])
+                        )
+
+                finger3 = gershwin.Finger(
+                length = 16,
+                note = gershwin.Wandering(mids),
+                duration = gershwin.Oscilating(range(2,8)),
+                velocity = gershwin.Randomized(range(20,127)),
+                rest = gershwin.Randomized([10,20,40])
+                )
+
+
+                x=800
+                
+                drone = (finger1.next(90) | transforms.stretch(1))*2
+                #drone = gershwin.multiply(drone,[-3])
+                measure = drone.next_offset()-1
+                #metrenome 
+                alpha = (drone*2)+(gershwin.humanize(drone,1,2,1,2,0))+(drone*2)+(gershwin.humanize(drone,1,2,1,0,1))+(drone*2)+(gershwin.humanize(drone,1,2,1,0,1))+(drone*2)
+                drone2 = (finger1.next(90) | transforms.stretch(1))*2
+                humanized_drone2 = (gershwin.humanize(drone2,1,2,1,0,1))
+                beta = (drone*2)+(humanized_drone2)+(drone2*2)+(humanized_drone2)+(drone2*2)+(humanized_drone2)+(drone2*2)
+                solo1 = finger2.next(measure)+(gershwin.humanize(finger2.next(measure),octave=1) | delay(measure))+(finger2.next(measure) | delay(measure))
+                output = alpha//(beta | delay(measure*2))
+                self.hand = [finger1,finger2]
+                self.last = output | transforms.stretch(1)
+                try:
+                        player.play([self.last | midi_pitch()])
+                except Exception as e:
+                        print e
+
+
+        def last(self):
+                return self.last
+
+
+
+class BenSong(object):
+        def __init__(self):
+                self.hand = []
+        '''
+        keyboards = [gershwin.Keyboard(), gershwin.MinorBluesKeyboard(), gershwin.EvenKeyboard(), gershwin.OddKeyboard(), gershwin.PentatonicKeyboard()]
+        pickers = [
+        gershwin.Randomized(),
+        gershwin.Wandering(), 
+        gershwin.Oscilating(), 
+        gershwin.Ascending(), 
+        gershwin.Constant()
+        ]
+        '''
+
+        def next(self):
+                keys = gershwin.MinorBluesKeyboard().notes
+                self.keys = list(keys)
+                keycount = len(self.keys)
+                stretch_length = random.randint(2,5)
+                left_low = random.randint(keycount/4,(keycount/2))
+                left_range = random.randint(1,2)
+                mids = HSeq(self.keys.__getslice__(left_low,left_low+left_range))
+                right = HSeq(self.keys.__getslice__(keycount-(keycount/4), keycount-1))
+
+                finger1 = gershwin.Finger(
+                length = 16,
+                note = gershwin.Wandering(mids),
+                duration = gershwin.Oscilating([16, 32]),
+                velocity = gershwin.Randomized(range(20,127)),
+                rest = gershwin.Randomized([16, 32])
+                )
+
+                finger2 = gershwin.Finger(
+                        length = 160,
+                        note = gershwin.Wandering(right),
+                        duration = gershwin.Randomized([8,16,24,32]),
+                        velocity = gershwin.Wandering(range(50,90)),
+                        rest = gershwin.Randomized([8,16,24,32])
+                        )
+
+                finger3 = gershwin.Finger(
+                length = 16,
+                note = gershwin.Wandering(mids),
+                duration = gershwin.Oscilating(range(2,8)),
+                velocity = gershwin.Randomized(range(20,127)),
+                rest = gershwin.Randomized([10,20,40])
+                )
+
+
+                x=800
+                
+                drone = (finger1.next(80))*2
+                #drone = gershwin.multiply(drone,[-3])
+                measure = drone.next_offset()-1
+                #metrenome 
+                alpha = (drone*2)+(gershwin.humanize(drone,1,2,1,2,0))+(drone*2)+(gershwin.humanize(drone,1,2,1,0,1))+(drone*2)+(gershwin.humanize(drone,1,2,1,0,1))+(drone*2)
+                drone2 = (finger1.next(90) | transforms.stretch(1))*2
+                humanized_drone2 = (gershwin.humanize(drone2,1,2,1,0,1))
+                beta = (drone*2)+(humanized_drone2)+(drone2*2)+(humanized_drone2)+(drone2*2)+(humanized_drone2)+(drone2*2)
+                solo1 = finger2.next(measure)+(gershwin.humanize(finger2.next(measure),octave=1) | delay(measure))+(finger2.next(measure) | delay(measure))
+                output = alpha//(beta | delay(measure*2))
+                self.hand = [finger1,finger2]
+                self.last = output | transforms.stretch(.5)
+                try:
+                        player.play([self.last | midi_pitch()])
+                except Exception as e:
+                        print e
+
+
+        def last(self):
+                return self.last
+
+
+
+
+
+
+'''
+when picking a next note, choose to modify the previous somehow
+perhaps augmenting it or making it sharp or flat
+the picker's stickiness could be adjusted for different genres
+'''

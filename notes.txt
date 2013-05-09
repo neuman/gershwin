@@ -1,0 +1,7 @@
+at stretch = 1 tempo is 120BPM, DURATION_64:16 = quarter note
+most written music is within BPM: range(40,230)
+
+
+humanize, finger.next all need to spit out sequences of the same time length
+psychoacoustics
+strong vs weak beats

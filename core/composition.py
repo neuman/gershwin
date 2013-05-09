@@ -7,49 +7,63 @@ from sebastian.core.transforms import transpose, reverse, add, degree_in_key, mi
 print transpose
 
 OFFSET_64 = 'OFFSET_64'
-notes_in_an_octave = 12
+range_of_pitches = range(1,12)
 range_of_octaves = range(0,10)
+range_of_durations = range(1,100)
+range_of_valocities = range(0,100)
 
+
+class Keyboard(object):
+    notes = HSeq()
+    #range(48,12) = middle c
+    def __init__(self):
+        self.notes = self.get_octaves([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], range(1,9))
+
+    def get_octaves(self, pitches, octaves):
+        output = HSeq()
+        for r in octaves:
+            octave = HSeq(Point(pitch=pitch, octave=r, velocity=90, duration_64=3) for pitch in pitches)
+            output = output + octave
+        return output
+
+
+'''
 class Keyboard(object):
     notes = []
     #range(48,12) = middle c
     def __init__(self):
         self.notes = HSeq(Point(pitch=pitch) for pitch in range(21,108))
+'''
 
 class MinorBluesKeyboard(Keyboard):
     """docstring for BluesKeyboard"""
     def __init__(self):
         super(MinorBluesKeyboard, self).__init__()
-        #bluesminor = HSeq(Point(pitch=pitch) for pitch in [0, 3, 5, 6, 7, 10])
-        bluesminor = HSeq(Point(pitch=pitch, octave=5, velocity=90, duration_64=3) for pitch in [0, 3, 5, 6, 7, 10])
-        self.notes = bluesminor
-        for t in range(0, 9):
-            bluesminor = bluesminor | transpose(notes_in_an_octave) #it's 12
-            self.notes += bluesminor
+        self.notes = self.get_octaves([0, 3, 5, 6, 7, 10], range(1,9))
 
-class NewMinorBluesKeyboard(Keyboard):
-    """docstring for BluesKeyboard"""
+class EvenKeyboard(Keyboard):
+    """docstring for EvenKeyboard"""
     def __init__(self):
-        super(MinorBluesKeyboard, self).__init__()
-        self.pitches = [0, 3, 5, 6, 7, 10]
-        for o in range_of_octaves:
-            octave = HSeq(Point(pitch=pitch) for pitch in self.pitches)
-        self.notes = bluesminor
-        for t in range(0, 9):
-            print bluesminor
-            bluesminor = bluesminor | transpose(notes_in_an_octave) #it's 12
-            self.notes += bluesminor
-        self.notes = self.notes | add({DURATION_64:3})
+        super(EvenKeyboard, self).__init__()
+        self.notes = self.get_octaves([0, 2, 4, 6, 8, 10], range(1,9))
+
+class OddKeyboard(Keyboard):
+    """docstring for OddKeyboard"""
+    def __init__(self):
+        super(OddKeyboard, self).__init__()
+        self.notes = self.get_octaves([1,3,5,7,9,11], range(1,9))
+
+class MajorKeyboard(Keyboard):
+    """docstring for MajorKeyboard"""
+    def __init__(self):
+        super(MajorKeyboard, self).__init__()
+        self.notes = self.get_octaves([1,3,5,0,2,4,6], range(1,9))
 
 class PentatonicKeyboard(Keyboard):
-    """docstring for BluesKeyboard"""
+    """docstring for PentatonicKeyboard"""
     def __init__(self):
         super(PentatonicKeyboard, self).__init__()
-        pentatonic = HSeq(Point(midi_pitch=pitch) for pitch in [0,2,3,6,7])
-        self.notes = pentatonic
-        for t in range(0, 9):
-            pentatonic = pentatonic | transpose(notes_in_an_octave) #it's 12
-            self.notes += pentatonic
+        self.notes = self.get_octaves([0,2,3,6,7], range(1,9))
 
 class Randomized(object):
     def __init__(self, population, stickiness=0):
@@ -162,6 +176,9 @@ class Constant(object):
         self.last = self.population
         return self.last
 
+    def reset(self):
+        pass
+
 class Sticky(Randomized):
     def __init__(self, population, chance, max):
         """
@@ -219,22 +236,36 @@ def loop(loops):
 
 
 
-def humanize(seq, pitch=0, duration=0, velocity=0, offset=0):
+def humanize(seq, pitch=0, duration=0, velocity=0, offset=0, octave=0):
     output = []
     for point in seq:
-        new_pitch = random.randint(point['midi_pitch']-pitch,point['midi_pitch']+pitch)
-        new_velocity = random.randint(point['velocity']-velocity,point['velocity']+velocity)
-        new_duration = random.randint(point[DURATION_64]-duration,point[DURATION_64]+duration)
-        new_offset = random.randint(point[OFFSET_64]-offset,point[OFFSET_64]+offset)
-        point.update({
-        'midi_pitch':new_pitch,
-        DURATION_64:new_duration,
-        'velocity':new_velocity,
-        OFFSET_64:new_offset
-        })
-        
+
+        rna = {
+        'midi_pitch':pitch, 
+        'pitch':pitch, 
+        'octave':octave,
+        'velocity':velocity, 
+        DURATION_64:duration, 
+        OFFSET_64:offset
+        }
+
+        for key in rna:
+            if key in point:
+                new_value = random.randint(point[key]-rna[key],point[key]+rna[key])
+                point.__setitem__(key, new_value)
+
         output.append(point)
     return OSequence(output)
+
+def deconstruct(seq, steps=1):
+    '''
+    gradually remove all notes in a sequence over n steps
+    '''
+    notes = list(seq)
+    for n in range(steps):
+      pass  
+
+
 
 
 
@@ -317,24 +348,27 @@ class AutoComposer(object):
 
 class Finger(object):
 
-    def __init__(self, length, note, duration, velocity):
+    def __init__(self, length=None, note=None, duration=None, velocity=None, rest=None):
         self.length = length
         self.note = note
         self.duration = duration
         self.velocity = velocity
+        self.rest = rest
         self.last = None
 
     def next(self, length):
         self.note.reset()
         self.duration.reset()
         self.velocity.reset()
+        self.rest.reset()
         seq = HSeq()
         total_length = 0
         while total_length < length:
             next = self.note.next() 
             next_duration = self.duration.next()
-            total_length += next_duration
-            next.update({DURATION_64: next_duration, "velocity": self.velocity.next()})
+            next_rest = self.rest.next()
+            total_length += next_duration+next_rest
+            next.update({DURATION_64: next_duration, OFFSET_64: next_rest, "velocity": self.velocity.next()})
             seq.append(next)
 
         self.last = OSequence(seq)
