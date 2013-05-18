@@ -6,11 +6,11 @@ from sebastian.core.transforms import stretch, transpose, reverse, add, degree_i
 from sebastian.core.notes import Key, major_scale
 import random
 import gershwin.core as gershwin
-from gershwin import songs, transforms
+from gershwin import metatracks, transforms
 from gershwin.core import composition
 kb = composition.Keyboard()
 
-d = songs.Omatic()
-d.next()
+d = metatracks.Omatic()
 finger1 = d.hand[0]
-finger1.last.display()
+d.next()
+finger1.last

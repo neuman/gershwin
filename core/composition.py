@@ -6,7 +6,7 @@ from sebastian.midi import player
 from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch, lilypond
 print transpose
 
-OFFSET_64 = 'OFFSET_64'
+OFFSET_64 = 'offset_64'
 range_of_pitches = range(1,12)
 range_of_octaves = range(0,10)
 range_of_durations = range(1,100)
@@ -219,6 +219,17 @@ def multiply(seq, matrix):
         output = output // (seq | transpose(m))
     return output
 
+def metrenome(count, pitch=5, octave=5, rest=64):
+    output = []
+    total = 0
+    duration = 1
+    for r in range(0,count):
+        beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=total+rest)
+        total+=(duration+rest)
+        output.append(beat)
+    return OSequence(output)
+
+
 def silence(seq):
     return seq | add({'velocity':0})
 
@@ -234,10 +245,17 @@ def loop(loops):
             output = output + last
     return output
 
+def generations(sequence, generations=2, pitch=0, duration=0, velocity=0, offset=0, octave=0):
+    last = sequence
+    output = sequence
+    for l in range(1,generations+1):
+        sequence += mutate(last, pitch, duration, velocity, offset, octave)
 
+    return output
 
-def humanize(seq, pitch=0, duration=0, velocity=0, offset=0, octave=0):
+def mutate(seq, pitch=0, duration=0, velocity=0, offset=0, octave=0):
     output = []
+    octave_delta = random.randint(-1*octave,octave)
     for point in seq:
 
         rna = {
@@ -248,13 +266,16 @@ def humanize(seq, pitch=0, duration=0, velocity=0, offset=0, octave=0):
         DURATION_64:duration, 
         OFFSET_64:offset
         }
-
+        new_point = Point()
         for key in rna:
             if key in point:
-                new_value = random.randint(point[key]-rna[key],point[key]+rna[key])
-                point.__setitem__(key, new_value)
+                if key == "octave":
+                    new_value = random.randint(point[key]-rna[key],point[key]+rna[key])+octave_delta
+                else:
+                    new_value = random.randint(point[key]-rna[key],point[key]+rna[key])
+                new_point.__setitem__(key, new_value)
 
-        output.append(point)
+        output.append(new_point)
     return OSequence(output)
 
 def deconstruct(seq, steps=1):
@@ -367,8 +388,15 @@ class Finger(object):
             next = self.note.next() 
             next_duration = self.duration.next()
             next_rest = self.rest.next()
+            if total_length+next_duration+next_rest > length:
+                #if there isn't time for this note, fill the rest of the time with silence 
+                print "fill"
+                duration_left = length - total_length
+                next.update({DURATION_64: duration_left, OFFSET_64: total_length, "velocity": 0})
+            else:
+                print "add"
+                next.update({DURATION_64: next_duration, OFFSET_64: total_length, "velocity": self.velocity.next()})
             total_length += next_duration+next_rest
-            next.update({DURATION_64: next_duration, OFFSET_64: next_rest, "velocity": self.velocity.next()})
             seq.append(next)
 
         self.last = OSequence(seq)
