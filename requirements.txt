@@ -1,1 +1,1 @@
-git+git://github.com/jtauber/sebastian.git@master
+git+git://github.com/neuman/sebastian.git@master

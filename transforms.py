@@ -4,7 +4,7 @@ from sebastian.core import OSequence, HSeq, Point, DURATION_64
 from sebastian.core.transforms import transform_sequence, transpose, reverse, add, degree_in_key, midi_pitch
 from sebastian.core.notes import Key, major_scale
 import sebastian.core.transforms as transforms
-from gershwin.core.composition import OFFSET_64
+from core.composition import OFFSET_64
 
 @transform_sequence
 def delay(interval, point):

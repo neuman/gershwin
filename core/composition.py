@@ -3,7 +3,7 @@ from sebastian.lilypond.interp import parse
 from sebastian.core.transforms import reverse
 from sebastian.core import OSequence, HSeq, Point, DURATION_64
 from sebastian.midi import player
-from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch, lilypond
+from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch #lilypond
 print transpose
 
 OFFSET_64 = 'offset_64'
@@ -374,6 +374,7 @@ class Finger(object):
         self.note = note
         self.duration = duration
         self.velocity = velocity
+        print "rest "+str(rest)
         self.rest = rest
         self.last = None
 
@@ -381,7 +382,10 @@ class Finger(object):
         self.note.reset()
         self.duration.reset()
         self.velocity.reset()
-        self.rest.reset()
+        try:
+            self.rest.reset()
+        except Exception as e:
+            print e
         seq = HSeq()
         total_length = 0
         while total_length < length:

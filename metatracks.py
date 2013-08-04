@@ -5,9 +5,9 @@ from sebastian.core.transforms import transpose, reverse, add, degree_in_key, mi
 from sebastian.core.notes import Key, major_scale
 import random
 
-from gershwin.core import composition as gershwin
-from gershwin.transforms import delay
+from core import composition as gershwin
 import sebastian.core.transforms as transforms
+from transforms import delay
 
 class Dramatic(object):
         def __init__(self):
@@ -394,7 +394,7 @@ class Mutational(object):
 
                 x=800
                 
-                drone = (finger1.next(256*2) | transforms.stretch(.5))*2
+                drone = (finger1.next(856*2) | transforms.stretch(.5))*2
                 self.drone = drone
                 self.phrase1 = (drone*2)+(gershwin.mutate(drone,1,2,1,2,1))+(drone*2)+(gershwin.mutate(drone,1,2,1,0,1))+(drone*2)+(gershwin.mutate(drone,1,2,1,0,1))+(drone*2)
                 measure = drone.next_offset()-1
@@ -428,7 +428,7 @@ class BeatBased(object):
         '''
 
         def next(self):
-                keys = gershwin.PentatonicKeyboard().notes
+                keys = gershwin.EvenKeyboard().notes
                 self.keys = list(keys)
                 keycount = len(self.keys)
                 right = HSeq(self.keys.__getslice__(keycount-(keycount/2), keycount-(keycount/4)))
@@ -437,13 +437,17 @@ class BeatBased(object):
                 seed_unit = random.choice([1,2,4,8,16])
                 seed_duration = whole/seed_unit
                 measure_length = 4*whole
+                phrase_lengths = range(50,90)
+                phrase_length = gershwin.Randomized(phrase_lengths)
+                reaches = range(-1,1)
+                reach = gershwin.Wandering(reaches)
 
                 finger1 = gershwin.Finger(
                 length = 16,
                 note = gershwin.Wandering(right),
-                duration = gershwin.Oscilating([2,4,4,4,4,4,4,4,4,4,8,16,32]),
+                duration = gershwin.Randomized([2,4,4,4,4,4,4,4,4,4,5,6,9,8,8,8,8,16,32,32,32]),
                 velocity = gershwin.Randomized(range(20,127)),
-                rest = gershwin.Randomized([2,4,8,16,32])
+                rest = gershwin.Randomized([2,4,8,16,32,32,32,32,32,32,32,32])
                 )
 
                 finger2 = gershwin.Finger(
@@ -465,14 +469,18 @@ class BeatBased(object):
 
                 beat = gershwin.metrenome(seed_unit,seed_pitch,5,seed_duration)
                 measure_length = beat.next_offset()
-                phrase1 = finger1.next(90)
+                phrase_length_new = phrase_length.next()
+                phrase1 = finger1.next(phrase_length_new)
                 phrase1_b = gershwin.mutate(phrase1,1,2,1,0,0)
-                phrase2 = finger2.next(90)
+                phrase2 = finger2.next(phrase_length_new*2)
                 phrase2_b = gershwin.mutate(phrase2,1,2,1,0,0)
+                phrase3 = finger1.next(phrase_length_new*3)
+                phrase1_3 = gershwin.mutate(phrase3,1,2,1,0,0)
                 #metrenome 
-                left_seq = (phrase1*3)+phrase1_b+(phrase1*3)+phrase1_b
+                left_seq = (phrase1*3)+phrase1_b+(phrase3*3)+phrase1_b
                 right_seq = (phrase2*3)+phrase2_b+(phrase2*3)+phrase2_b
-                self.output = left_seq+right_seq+left_seq
+                left_composition = (left_seq*2)+((left_seq*2) | transpose(reach.next()) )+(left_seq*2)
+                self.output = left_composition#//(right_seq | delay(phrase1.next_offset()*2))
                 self.hand = [finger1,finger2]
                 self.last = self.output | transforms.stretch(.25)
                 try:
@@ -490,3 +498,44 @@ when picking a next note, choose to modify the previous somehow
 perhaps augmenting it or making it sharp or flat
 the picker's stickiness could be adjusted for different genres
 '''
+
+
+
+class Jeff(object):
+        def __init__(self):
+                self.hand = []
+
+        def next(self):
+                keys = gershwin.MajorKeyboard().notes
+                self.keys = list(keys)
+                keys = HSeq(self.keys.__getslice__(40,80))
+                keycount = len(self.keys)
+
+                stretch_length = (1,5,12)
+
+                finger1 = gershwin.Finger(
+                length = 16,
+                note = gershwin.Wandering(keys),
+                duration = gershwin.Wandering([2,4,8,16,24,32]),
+                velocity = gershwin.Wandering(range(50,100)),
+                rest = gershwin.Randomized([4,8,16])
+                )
+                x=800
+                
+                drone = (finger1.next(90) | transforms.stretch(1))*2
+                #drone = gershwin.multiply(drone,[-3])
+                measure = drone.next_offset()-1
+                #metrenome 
+                alpha = finger1.next(700)
+                self.hand = [finger1]
+                self.last = alpha
+
+
+                try:
+                        player.play([self.last | midi_pitch()])
+                except Exception as e:
+                        print e
+
+
+        def last(self):
+                return self.last
