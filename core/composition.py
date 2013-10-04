@@ -11,20 +11,35 @@ range_of_pitches = range(1,12)
 range_of_octaves = range(0,10)
 range_of_durations = range(1,100)
 range_of_valocities = range(0,100)
+rosetta_stone = [5,0,7,2,9,4,11,6,1,8,3,10]
 
 
 class Keyboard(object):
     notes = HSeq()
     #range(48,12) = middle c
-    def __init__(self):
-        self.notes = self.get_octaves([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], range(1,9))
+    def __init__(self, hseq=None):
+        if hseq == None:
 
-    def get_octaves(self, pitches, octaves):
+            self.pitches =  rosetta_stone
+            #what it should be in reality[5,0,7,2,9,4,11,6,1,8,3,10]
+            self.notes = self.get_octaves(range(1,9))
+        else:
+            self.notes = hseq
+
+    def get_octaves(self, octaves):
         output = HSeq()
         for r in octaves:
-            octave = HSeq(Point(pitch=pitch, octave=r, velocity=90, duration_64=3) for pitch in pitches)
+            octave = HSeq(Point(pitch=rosetta_stone[pitch], octave=r, velocity=90, duration_64=10) for pitch in self.pitches)
             output = output + octave
         return output
+
+    def get_octaves_as_keyboard(self, octaves):
+        hseq = self.get_octaves(octaves)
+        return Keyboard(hseq)
+
+    def play(self):
+        player.play([OSequence(self.notes | midi_pitch())])
+
 
 
 '''
@@ -39,31 +54,37 @@ class MinorBluesKeyboard(Keyboard):
     """docstring for BluesKeyboard"""
     def __init__(self):
         super(MinorBluesKeyboard, self).__init__()
-        self.notes = self.get_octaves([0, 3, 5, 6, 7, 10], range(1,9))
+        self.pitches = [0, 3, 5, 6, 7, 10]
+        #[3,]
+        self.notes = self.get_octaves(range(1,9))
 
 class EvenKeyboard(Keyboard):
     """docstring for EvenKeyboard"""
     def __init__(self):
         super(EvenKeyboard, self).__init__()
-        self.notes = self.get_octaves([0, 2, 4, 6, 8, 10], range(1,9))
+        self.pitches = [0, 2, 4, 6, 8, 10]
+        self.notes = self.get_octaves(range(1,9))
 
 class OddKeyboard(Keyboard):
     """docstring for OddKeyboard"""
     def __init__(self):
         super(OddKeyboard, self).__init__()
-        self.notes = self.get_octaves([1,3,5,7,9,11], range(1,9))
+        self.pitches = [1,3,5,7,9,11]
+        self.notes = self.get_octaves(range(1,9))
 
 class MajorKeyboard(Keyboard):
     """docstring for MajorKeyboard"""
     def __init__(self):
         super(MajorKeyboard, self).__init__()
-        self.notes = self.get_octaves([1,3,5,0,2,4,6], range(1,9))
+        self.pitches = [1,3,5,0,2,4,6]
+        self.notes = self.get_octaves(range(1,9))
 
 class PentatonicKeyboard(Keyboard):
     """docstring for PentatonicKeyboard"""
     def __init__(self):
         super(PentatonicKeyboard, self).__init__()
-        self.notes = self.get_octaves([0,2,3,6,7], range(1,9))
+        self.pitches = [0,2,3,6,7]
+        self.notes = self.get_octaves(self.pitches, range(1,9))
 
 class Randomized(object):
     def __init__(self, population, stickiness=0):
