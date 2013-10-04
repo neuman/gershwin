@@ -8,7 +8,8 @@ import random
 import core as gershwin
 import metatracks, transforms
 from core import composition
-kb = composition.Keyboard()
+kb = composition.MinorKeyboard()
+kb.play()
 
 d = metatracks.Jeff()
 #finger1 = d.hand[0]

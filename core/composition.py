@@ -76,15 +76,22 @@ class MajorKeyboard(Keyboard):
     """docstring for MajorKeyboard"""
     def __init__(self):
         super(MajorKeyboard, self).__init__()
-        self.pitches = [1,3,5,0,2,4,6]
+        self.pitches = [0,2,4,5,7,9,11]
+        self.notes = self.get_octaves(range(1,9))
+
+class MinorKeyboard(Keyboard):
+    """docstring for MajorKeyboard"""
+    def __init__(self):
+        super(MinorKeyboard, self).__init__()
+        self.pitches = [0,2,3,5,7,8,10]
         self.notes = self.get_octaves(range(1,9))
 
 class PentatonicKeyboard(Keyboard):
     """docstring for PentatonicKeyboard"""
     def __init__(self):
         super(PentatonicKeyboard, self).__init__()
-        self.pitches = [0,2,3,6,7]
-        self.notes = self.get_octaves(self.pitches, range(1,9))
+        self.pitches = [0,3,5,7,10]
+        self.notes = self.get_octaves(range(1,9))
 
 class Randomized(object):
     def __init__(self, population, stickiness=0):
