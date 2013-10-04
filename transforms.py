@@ -16,3 +16,33 @@ def delay(interval, point):
     if OFFSET_64 in point:
         point[OFFSET_64] = point[OFFSET_64] + interval
     return point
+
+@transform_sequence
+def mutate(pitch=0, duration=0, velocity=0, offset=0, octave=0, point):
+	def mutate(seq, pitch=0, duration=0, velocity=0, offset=0, octave=0):
+    """
+    Transpose a point by an interval, using the Sebastian interval system
+    """
+    if "offset" in point:
+        point["offset"] = point["offset"] + interval
+    if OFFSET_64 in point:
+        point[OFFSET_64] = point[OFFSET_64] + interval
+
+    rna = {
+    'midi_pitch':pitch, 
+    'pitch':pitch, 
+    'octave':octave,
+    'velocity':velocity, 
+    DURATION_64:duration, 
+    OFFSET_64:offset
+    }
+    new_point = Point()
+    for key in rna:
+        if key in point:
+            if key == "octave":
+                new_value = random.randint(point[key]-rna[key],point[key]+rna[key])+octave_delta
+            else:
+                new_value = random.randint(point[key]-rna[key],point[key]+rna[key])
+            new_point.__setitem__(key, new_value)
+
+    return new_point

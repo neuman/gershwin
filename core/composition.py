@@ -12,6 +12,7 @@ range_of_octaves = range(0,10)
 range_of_durations = range(1,100)
 range_of_valocities = range(0,100)
 rosetta_stone = [5,0,7,2,9,4,11,6,1,8,3,10]
+#rosetta_stone = [1,2,3,4,5,6,7,8,9,10,11,12]
 
 
 class Keyboard(object):
@@ -27,9 +28,9 @@ class Keyboard(object):
             self.notes = hseq
 
     def get_octaves(self, octaves):
-        output = HSeq()
+        output = OSequence()
         for r in octaves:
-            octave = HSeq(Point(pitch=rosetta_stone[pitch], octave=r, velocity=90, duration_64=10) for pitch in self.pitches)
+            octave = OSequence(Point(pitch=rosetta_stone[pitch], octave=r, velocity=90, duration_64=10) for pitch in self.pitches)
             output = output + octave
         return output
 
