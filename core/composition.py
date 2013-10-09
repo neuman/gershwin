@@ -11,12 +11,13 @@ range_of_pitches = range(1,12)
 range_of_octaves = range(0,10)
 range_of_durations = range(1,100)
 range_of_valocities = range(0,100)
-rosetta_stone = [5,0,7,2,9,4,11,6,1,8,3,10]
-#rosetta_stone = [1,2,3,4,5,6,7,8,9,10,11,12]
+#rosetta_stone = [5,0,7,2,9,4,11,6,1,8,3,10]
+#rosetta_stone = [1,2,3,4,5,6,7,8,9,10,11]
+rosetta_stone = [-2,5,0,-5,2,-3,4,-1,6,1,-4,3]
 
 
 class Keyboard(object):
-    notes = HSeq()
+    notes = OSequence()
     #range(48,12) = middle c
     def __init__(self, hseq=None):
         if hseq == None:
@@ -30,8 +31,13 @@ class Keyboard(object):
     def get_octaves(self, octaves):
         output = OSequence()
         for r in octaves:
-            octave = OSequence(Point(pitch=rosetta_stone[pitch], octave=r, velocity=90, duration_64=10) for pitch in self.pitches)
-            output = output + octave
+            #octave = OSequence(Point(pitch=pitch, octave=r, velocity=90) for pitch in self.pitches)
+            octave = []
+            for pitch in self.pitches:
+                new_point = Point(pitch=pitch, octave=r, velocity=90, duration_64=10)
+                print OSequence(new_point) | midi_pitch()
+                octave.append(new_point)
+            output = output + OSequence(octave)
         return output
 
     def get_octaves_as_keyboard(self, octaves):
@@ -415,7 +421,7 @@ class Finger(object):
             self.rest.reset()
         except Exception as e:
             print e
-        seq = HSeq()
+        seq = OSequence()
         total_length = 0
         while total_length < length:
             next = self.note.next() 
@@ -423,16 +429,17 @@ class Finger(object):
             next_rest = self.rest.next()
             if total_length+next_duration+next_rest > length:
                 #if there isn't time for this note, fill the rest of the time with silence 
-                print "fill"
+                print "fill"+str(total_length)
                 duration_left = length - total_length
                 next.update({DURATION_64: duration_left, OFFSET_64: total_length, "velocity": 0})
             else:
-                print "add"
+                print "add"+str(total_length)
                 next.update({DURATION_64: next_duration, OFFSET_64: total_length, "velocity": self.velocity.next()})
             total_length += next_duration+next_rest
             seq.append(next)
+            print 'made it'
 
-        self.last = OSequence(seq)
+        self.last = seq
         return self.last
 
     def next_by_counts(self, count=None):
