@@ -642,38 +642,54 @@ class Transposify(object):
                 return self.last
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-class Jeff(object):
+class Jazzbot(object):
         def __init__(self):
                 self.hand = []
 
         def next(self):
-                keys = gershwin.MinorBluesKeyboard().notes
+                keys = gershwin.MajorKeyboard().notes
+                self.keys = list(keys)
+                keycount = len(self.keys)
+                measure = gershwin.metrenome(5,5,10,32)
+
+
+                finger1 = gershwin.Finger(
+                length = measure.next_offset(),
+                note = gershwin.Wandering(HSeq(self.keys.__getslice__(20,21))),
+                duration = gershwin.Wandering([4,8,16,32,64]),
+                velocity = gershwin.Wandering(range(50,51)),
+                rest = gershwin.Randomized([8])
+                )
+
+                incoming = finger1.next(measure.next_offset())
+                output = OSequence()
+                last = incoming
+                for r in xrange(16):
+                        current = incoming | new_transforms.mutate(1,2,30,0,0)
+                        output += (last // current)
+                        last = current
+
+                self.hand = [finger1]
+                sequence_1 = (output)
+
+                self.last = sequence_1
+
+                try:
+                        player.play([self.last | midi_pitch()])
+                except Exception as e:
+                        print e
+
+
+        def last(self):
+                return self.last
+
+
+class Neustar(object):
+        def __init__(self):
+                self.hand = []
+
+        def next(self):
+                keys = gershwin.MajorKeyboard().notes
                 self.keys = list(keys)
 
                 keycount = len(self.keys)
@@ -682,8 +698,8 @@ class Jeff(object):
 
                 finger1 = gershwin.Finger(
                 length = 300,
-                note = gershwin.Wandering(HSeq(self.keys.__getslice__(20,40))),
-                duration = gershwin.Wandering([8]),
+                note = gershwin.Wandering(HSeq(self.keys.__getslice__(20,80))),
+                duration = gershwin.Wandering([8,4]),
                 velocity = gershwin.Wandering(range(50,51)),
                 rest = gershwin.Randomized([8])
                 )
@@ -696,15 +712,30 @@ class Jeff(object):
                 rest = gershwin.Randomized([0])
                 )
 
-                alpha = finger1.next(60)
-                beta = finger2.next(60)
-                gamma = finger1.next(70)
+                finger3 = gershwin.Finger(
+                length = 300,
+                note = gershwin.Wandering(self.keys),
+                duration = gershwin.Wandering([2,4,6,8,16]),
+                velocity = gershwin.Wandering(range(50,80)),
+                rest = gershwin.Wandering([2,4,6,8,16])
+                )
+
+                g = 50
                 self.hand = [finger1]
-                sequence_1 = (alpha//beta) | transforms.stretch(.5)
-                #sequence_2 = sequence_1 | transforms.stretch(.5)
-                sequence_2 = sequence_1 | transpose(11)
-                sequence_3 = sequence_1 | transpose(1) 
-                self.last = sequence_1+sequence_2+sequence_3+sequence_1
+                sequence_1 = (finger1.next(g)//finger2.next(g))
+                sequence_1_a = sequence_1 | transpose(11)
+                sequence_1_b = sequence_1 | transpose(1) 
+
+                sequence_2 = (finger2.next(g)//finger2.next(g))
+                sequence_2_a = sequence_1 | transpose(11)
+                sequence_2_b = sequence_1 | transpose(1) 
+
+                sequence_3 = (finger1.next(g)//finger1.next(g))
+                sequence_3_a = sequence_1 | transpose(11)
+                sequence_3_b = sequence_1 | transpose(1) 
+
+                solo = finger3.next(g*6)
+                self.last = sequence_1+sequence_1_a+((sequence_2_b+sequence_2+sequence_1+sequence_3_a+sequence_3_b+sequence_1_a))+sequence_2 | transforms.stretch(.5)
 
                 try:
                         player.play([self.last | midi_pitch()])
@@ -721,7 +752,7 @@ class Redux(object):
                 self.hand = []
 
         def next(self, mutation_matrix=[0,0,0,0,0]):
-                keys = gershwin.MajorKeyboard().notes
+                keys = gershwin.PentatonicKeyboard().notes
                 self.keys = list(keys)
                 keys = HSeq(self.keys.__getslice__(30,50))
 

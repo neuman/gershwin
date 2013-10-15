@@ -3,7 +3,7 @@ from sebastian.lilypond.interp import parse
 from sebastian.core.transforms import reverse
 from sebastian.core import OSequence, HSeq, Point, DURATION_64
 from sebastian.midi import player
-from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch #lilypond
+from sebastian.core.transforms import transpose, reverse, add, degree_in_key, midi_pitch , midi_to_pitch#lilypond
 print transpose
 
 OFFSET_64 = 'offset_64'
@@ -258,6 +258,8 @@ def metrenome(count, pitch=5, octave=5, rest=64):
     output = []
     total = 0
     duration = 1
+    beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=0)
+    output.append(beat)
     for r in range(0,count):
         beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=total+rest)
         total+=(duration+rest)
@@ -456,6 +458,11 @@ class Finger(object):
 
         self.last = OSequence(seq)
         return self.last
+
+def deduce_rosetta_stone():
+    octave = parse("c cis d dis e f fis g gis a ais b") | midi_to_pitch()
+    pitches = [point['pitch'] for point in octave]
+    return pitches
 
 
 
