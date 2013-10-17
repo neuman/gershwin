@@ -109,7 +109,9 @@ class Randomized(object):
         self.reset()
 
     def reset(self):
+        print 'reseting randomized'
         self.max = len(self.population)-1
+        print 'reset.'
 
     def pick(self):
         pick = random.randint(0, self.max)
@@ -411,7 +413,7 @@ class Finger(object):
         self.note = note
         self.duration = duration
         self.velocity = velocity
-        print "rest "+str(rest)
+        #print "rest "+str(rest)
         self.rest = rest
         self.last = None
 
@@ -423,6 +425,7 @@ class Finger(object):
             self.rest.reset()
         except Exception as e:
             print e
+            print 'no rest to reset'
         seq = OSequence()
         total_length = 0
         while total_length < length:
@@ -431,15 +434,15 @@ class Finger(object):
             next_rest = self.rest.next()
             if total_length+next_duration+next_rest > length:
                 #if there isn't time for this note, fill the rest of the time with silence 
-                print "fill"+str(total_length)
+                #print "fill"+str(total_length)
                 duration_left = length - total_length
                 next.update({DURATION_64: duration_left, OFFSET_64: total_length, "velocity": 0})
             else:
-                print "add"+str(total_length)
+                #print "add"+str(total_length)
                 next.update({DURATION_64: next_duration, OFFSET_64: total_length, "velocity": self.velocity.next()})
             total_length += next_duration+next_rest
             seq.append(next)
-            print 'made it'
+            #print 'made it'
 
         self.last = seq
         return self.last

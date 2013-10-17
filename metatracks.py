@@ -655,19 +655,40 @@ class Jazzbot(object):
 
                 finger1 = gershwin.Finger(
                 length = measure.next_offset(),
-                note = gershwin.Wandering(HSeq(self.keys.__getslice__(20,21))),
+                note = gershwin.Wandering(HSeq(self.keys.__getslice__(20,23))),
                 duration = gershwin.Wandering([4,8,16,32,64]),
                 velocity = gershwin.Wandering(range(50,51)),
                 rest = gershwin.Randomized([8])
                 )
 
-                incoming = finger1.next(measure.next_offset())
-                output = OSequence()
-                last = incoming
-                for r in xrange(16):
-                        current = incoming | new_transforms.mutate(1,2,30,0,0)
-                        output += (last // current)
-                        last = current
+                finger2 = gershwin.Finger(
+                length = measure.next_offset(),
+                note = gershwin.Wandering(HSeq(self.keys.__getslice__(23,24))),
+                duration = gershwin.Wandering([4,8,16,32,64]),
+                velocity = gershwin.Wandering(range(50,51)),
+                rest = gershwin.Randomized([8])
+                )
+
+                finger3 = gershwin.Finger(
+                length = measure.next_offset(),
+                note = gershwin.Wandering(HSeq(self.keys.__getslice__(26,27))),
+                duration = gershwin.Wandering([4,8,16,32,64]),
+                velocity = gershwin.Wandering(range(50,51)),
+                rest = gershwin.Randomized([8])
+                )
+
+                def fade_mutate(incoming, count, mutation_matrix=[1,2,30,0,0]):
+                        output = OSequence()
+                        last = incoming
+                        for r in xrange(16):
+                                current = last | new_transforms.mutate(mutation_matrix[0], mutation_matrix[1], mutation_matrix[2], mutation_matrix[3], mutation_matrix[4])
+                                output += (incoming // current)
+                                last = current
+                        return output
+
+                seq_1 = fade_mutate(finger1.next(measure.next_offset()),16)
+                seq_2 = fade_mutate(finger1.next(measure.next_offset()),16)
+                output = seq_1 // seq_2
 
                 self.hand = [finger1]
                 sequence_1 = (output)
