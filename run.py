@@ -9,9 +9,15 @@ import random
 import core as gershwin
 import metatracks, transforms
 from core import composition
-kb = composition.Keyboard()
+seq = gershwin.composition.metrenome(120,bpm=120)
+print seq
+player.play([seq | midi_pitch()])
 
-d = metatracks.Jazzbot()
+
+#kb = composition.Keyboard()
+
+#d = metatracks.Jazzbot()
 #finger1 = d.hand[0]
-d.next()
+#d.next()
 #finger1.last
+

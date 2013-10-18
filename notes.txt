@@ -1,7 +1,12 @@
 at stretch = 1 tempo is 120BPM, DURATION_64:16 = quarter note
 most written music is within BPM: range(40,230)
 
+1 time unit = .03s
+
 
 humanize, finger.next all need to spit out sequences of the same time length
 psychoacoustics
 strong vs weak beats
+
+
+"c cis d dis e f fis g gis a ais b" = [-2, 5, 0, -5, 2, -3, 4, -1, 6, 1, -4, 3]
