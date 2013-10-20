@@ -6,18 +6,11 @@ from sebastian.core.transforms import stretch, transpose, reverse, add, degree_i
 from sebastian.core.notes import Key, major_scale
 from sebastian.core import OSequence, HSeq, Point, DURATION_64
 import random
-import core as gershwin
 import metatracks, transforms
-from core import composition
-seq = gershwin.composition.metrenome(120,bpm=120)
-print seq
-player.play([seq | midi_pitch()])
-
-
-#kb = composition.Keyboard()
-
-#d = metatracks.Jazzbot()
+from core.composition import *
+from core.transforms import *
+d = metatracks.JazzBot()
 #finger1 = d.hand[0]
-#d.next()
+d.next()
 #finger1.last
 

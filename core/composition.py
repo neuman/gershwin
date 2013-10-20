@@ -109,9 +109,7 @@ class Randomized(object):
         self.reset()
 
     def reset(self):
-        print 'reseting randomized'
         self.max = len(self.population)-1
-        print 'reset.'
 
     def pick(self):
         pick = random.randint(0, self.max)
@@ -256,26 +254,14 @@ def multiply(seq, matrix):
         output = output // (seq | transpose(m))
     return output
 
-def metrenome_legacy(count, pitch=5, octave=5, rest=64):
-    output = []
+def metrenome(count, pitch=5, octave=10, bpm=120, velocity=90):
     total = 0
     duration = 1
-    beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=0)
-    output.append(beat)
-    for r in range(0,count):
-        beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=total+rest)
-        total+=(duration+rest)
-        output.append(beat)
-    return OSequence(output)
-
-def metrenome(count, pitch=5, octave=10, bpm=120):
-    total = 0
-    duration = 1
-    frequency = 60/float(bpm)*(30)
+    frequency = int(60/float(bpm)*(30))
     print frequency
     output = []
     for r in range(0,count):
-        beat = Point(pitch=pitch, octave=octave, velocity=90, duration_64=duration, offset_64=int(frequency+total))
+        beat = Point(pitch=pitch, octave=octave, velocity=velocity, duration_64=duration, offset_64=frequency+total)
         total+=(frequency)
         output.append(beat)
     return OSequence(output)
